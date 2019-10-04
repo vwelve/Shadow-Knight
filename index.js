@@ -1,12 +1,13 @@
-const { Client } = require('discord.js');
-const { readdirSync } = require('fs');
+const { Client, Collection } = require('discord.js');
 const { token } = require('./config.json');
 const SQLite = require('better-sqlite3');
 
 class Bot extends Client {
     constructor() {
         super();
-        this.levels = new SQLite("./levels");
+        this.levels = new SQLite("./levels.db");
+        this.commands = new Collection();
+        this.cooldown = new Collection();
     }
 
     /**
@@ -14,11 +15,15 @@ class Bot extends Client {
      * @param {the number of experience to give the user} xp 
      * @param {the id of the user to give the experience to} id 
      */
-    giveXP(xp, id) {
+    giveXP(xp, guild, user) {
         if (typeof id != "string" || typeof xp != "number") 
             throw new Exception("InputMismatch");
-        this.levels.prepare("UPDATE levels SET xp = xp + ? WHERE id = ?").run(xp,id);
-        const { xp:currentXP } = this.levels.prepare("SELECT xp WHERE id = ?").get(id);
+        try {
+            this.levels.prepare("UPDATE levels SET xp = xp + ? WHERE id = ?, guild = ?").run(xp,user.id, guild.id);
+        } catch (e) {
+            this.levels.prepare("INSERT INTO levels (xp, guild, id) (?,?,?)").run(xp,guild.id,user.id)
+        }
+        const { xp:currentXP } = this.levels.prepare("SELECT xp WHERE guild = ?, id = ?").get(guild.id,user.id);
         return currentXP;
     }
 
@@ -29,10 +34,10 @@ class Bot extends Client {
         return user;
     }
 
-    getXP(id) {
+    getXP(guild, user) {
         if (typeof id != "string") 
             throw new Exception("InputMismatch");
-        const { xp } = this.levels.prepare("SELECT xp WHERE id = ?").get(id);
+        const { xp } = this.levels.prepare("SELECT xp WHERE guild = ?, id = ?").get(guild.id,user.id);
         return xp;
     }
 

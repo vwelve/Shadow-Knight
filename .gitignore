@@ -1,0 +1,12 @@
+# Node Modules
+
+node_modules
+
+# JSON files 
+
+config.json
+package-lock.json
+
+# Database files
+
+*.db

@@ -1,9 +1,15 @@
-const reqEvent = event => require(`../events/${event}.js`);
+const { readdirSync} = require('fs');
 
 module.exports = (client) => {
 
-    client.on("ready",()=>{reqEvent('ready')(client)});
-    client.on("message",async (msg)=>{reqEvent('message')(client,msg)});
-    client.on("voiceStateUpdate",async (oMember,nMember) =>{reqEvent('voiceUpdate')(client,oMember,nMember)});
+    for (const file of readdirSync('./events')) {
+        
+        if (!file.endsWith('.js')) return;
+
+        const event = require(`../events/${file}`);
+        if (typeof(event.run) == "function" && typeof(event.name) == "string")
+            client.on(event.name, (...args) => event.run(...args));
+        
+    }
 
 }
