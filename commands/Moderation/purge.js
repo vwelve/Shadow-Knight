@@ -11,6 +11,7 @@ module.exports = {
     name: "purge",
     alias: ["delete","cleanup"],
     accessLvl: "guild",
+    description: "Purges messages from the guild.\nUsage:\n```\n.purge <number>\n```",
     permission: "MANAGE_MESSAGES",
     run: async (_client, msg, args) => {
 

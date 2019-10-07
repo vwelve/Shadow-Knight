@@ -3,6 +3,7 @@ module.exports = {
     alias: [],
     accessLvl: "guild",
     permission: "BAN_MEMBERS",
+    description: "Bans a user from the guild.\nUsage:\n```\n.ban <user>\n```",
     run: async (client, msg, args) => {
 
         let user = args[0].replace("^@","");

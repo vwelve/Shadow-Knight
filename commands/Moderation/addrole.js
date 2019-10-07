@@ -2,6 +2,7 @@ module.exports = {
     name: "addrole",
     alias: ["giverole","roleadd"],
     accessLvl: "guild",
+    description: `Gives the role of a the role of a user.\nUsage: \`\`\`\n.addrole <user> <role>\n\`\`\``,
     permission: "MANAGE_ROLES",
     run: async (client, msg, args) => {
 

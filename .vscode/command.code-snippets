@@ -1,0 +1,7 @@
+{
+    "Command Template": {
+        "scope": "javascript",
+        "prefix": "command",
+        "body": "module.exports = {\n\tname: \"$TM_FILENAME_BASE\",\n\talias: [\"$1\"],\n\taccessLvl: \"${2:guild}\",\n\tpermission: \"${3:VIEW_CHANNEL}\",\n\trun: async (client, ${4:msg}, args) => {\n\n\t}\n}"
+    }
+}

@@ -1,6 +1,5 @@
 const { Client, Collection } = require('discord.js');
 const { token } = require('./config.json');
-const fetch = require("node-fetch");
 const SQLite = require('better-sqlite3');
 
 class Bot extends Client {
@@ -8,9 +7,8 @@ class Bot extends Client {
         super();
         this.levels = new SQLite("./levels.db");
         this.commands = new Collection();
-        this.cooldown = new Collection();
+        this.cooldowns = new Collection();
         this.globalChannels = new Collection();
-        
     }
 
     /**
@@ -18,10 +16,14 @@ class Bot extends Client {
      * @param {the message object of the message} msg 
      */
     async messageSent(msg) {
-        await fetch("", {
-            method:"POST",
-            body: JSON.stringify()
-        });
+        for (const [guild, webhook] of this.globalChannels) {
+            if (guild == msg.guild.id || !webhook) continue;
+
+            webhook.send(msg.content, {
+                avatarURL: msg.author.avatarURL,
+                username: msg.author.username
+            });
+        }
     }
 
     /**
@@ -30,14 +32,15 @@ class Bot extends Client {
      * @param {the id of the user to give the experience to} id 
      */
     giveXP(xp, guild, user) {
-        if (typeof id != "string" || typeof xp != "number") 
-            throw new Exception("InputMismatch");
+        if (typeof user.id != "string" || typeof xp != "number" || typeof guild.id != "string") 
+            throw new Error("InputMismatch");
         try {
-            this.levels.prepare("UPDATE levels SET xp = xp + ? WHERE id = ?, guild = ?").run(xp,user.id, guild.id);
+            this.levels.prepare("UPDATE levels SET xp = xp + ? WHERE userid = ? AND guild = ?").run(xp,user.id, guild.id);
         } catch (e) {
-            this.levels.prepare("INSERT INTO levels (xp, guild, id) (?,?,?)").run(xp,guild.id,user.id)
+            this.levels.prepare("INSERT INTO levels (xp, guild, userid) VALUES(?,?,?)").run(xp,guild.id,user.id)
         }
-        const { xp:currentXP } = this.levels.prepare("SELECT xp WHERE guild = ?, id = ?").get(guild.id,user.id);
+        const currentXP = this.levels.prepare("SELECT * FROM levels WHERE guild = ? AND userid = ?").get(guild.id,user.id);
+        
         return currentXP;
     }
 
@@ -53,9 +56,9 @@ class Bot extends Client {
                 try{
                     user = this.guilds.get(guild.id).members.find(m => m.user.tag.startsWith(input)).user; // Find the first user that starts with input
                 } catch (er) {
-                    resolve(user);
+                    resolve(undefined);
                 }
-            } else if (!user) reject(new Exception("Expected value for \"guild\""));
+            } else if (!user) reject(new Error("Expected value for \"guild\""));
             resolve(user);
         }); 
     }
@@ -66,11 +69,23 @@ class Bot extends Client {
      * @param {the user object of the user} user 
      */
     getXP(guild, user) {
-        if (typeof id != "string") 
-            throw new Exception("InputMismatch");
-        const { xp } = this.levels.prepare("SELECT xp WHERE guild = ?, id = ?").get(guild.id,user.id);
+        if (typeof(user.id) != "string") 
+            throw new Error("InputMismatch");
+        const { xp } = this.levels.prepare("SELECT xp WHERE guild = ? AND userid = ?").get(guild.id,user.id) || { xp: 0 };
         return xp;
     }
+
+    leaderBoard(user, guild, type="local") {
+        if (!user || !guild)
+            throw new Excetiption("Expeceted parameters user and guild.");
+        
+    }
+
+    getRank(user) {
+
+    }
+
+
 }
 
 const client = new Bot();

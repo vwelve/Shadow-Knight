@@ -8,7 +8,7 @@ module.exports = (client) => {
 
         const event = require(`../events/${file}`);
         if (typeof(event.run) == "function" && typeof(event.name) == "string")
-            client.on(event.name, (...args) => event.run(...args));
+            client.on(event.name, (...args) => event.run(client, ...args));
         
     }
 
