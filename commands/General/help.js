@@ -45,8 +45,10 @@ module.exports = {
             for (const folder of readdirSync('./commands')) {
                 let commands = [];
                 for (const file of readdirSync(`./commands/${folder}`)) {
-                    if (file.endsWith(".js"))
-                        commands.push(file.split(".")[0])
+                    if (file.endsWith(".js")) {
+                        cmd = require(`../${folder}/${file}`);
+                        commands.push(cmd.name)
+                    }
                 }
                 embed.addField(folder,commands.join("\n"));
             }

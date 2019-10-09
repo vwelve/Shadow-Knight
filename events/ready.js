@@ -2,7 +2,7 @@ module.exports = {
     name: "ready",
     run: async (client) => {
 
-        client.levels.prepare("CREATE TABLE IF NOT EXISTS levels (xp INTEGER, guild INTEGER, userid INTEGER)").run();
+        client.levels.prepare("CREATE TABLE IF NOT EXISTS levels (xp INTEGER, userid TEXT, UNIQUE(userid))").run();
         console.log(`NAME: ${client.user.username}\nID: ${client.user.id}`);
 
     }

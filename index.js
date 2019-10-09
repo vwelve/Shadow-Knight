@@ -31,16 +31,16 @@ class Bot extends Client {
      * @param {the number of experience to give the user} xp 
      * @param {the id of the user to give the experience to} id 
      */
-    giveXP(xp, guild, user) {
-        if (typeof user.id != "string" || typeof xp != "number" || typeof guild.id != "string") 
+    giveXP(xp, user) {
+        if (typeof user.id != "string" || typeof xp != "number") 
             throw new Error("InputMismatch");
         try {
-            this.levels.prepare("UPDATE levels SET xp = xp + ? WHERE userid = ? AND guild = ?").run(xp,user.id, guild.id);
+            this.levels.prepare("INSERT INTO levels (xp, userid) VALUES(?,?)").run(xp,user.id);
         } catch (e) {
-            this.levels.prepare("INSERT INTO levels (xp, guild, userid) VALUES(?,?,?)").run(xp,guild.id,user.id)
+            this.levels.prepare("UPDATE levels SET xp = xp + ? WHERE userid = ?").run(xp,user.id);            
         }
-        const currentXP = this.levels.prepare("SELECT * FROM levels WHERE guild = ? AND userid = ?").get(guild.id,user.id);
-        
+        const { xp:currentXP} = this.levels.prepare("SELECT * FROM levels WHERE userid = ?").get(user.id) || { xp: 0 };
+        console.log(currentXP)
         return currentXP;
     }
 
@@ -56,10 +56,10 @@ class Bot extends Client {
                 try{
                     user = this.guilds.get(guild.id).members.find(m => m.user.tag.startsWith(input)).user; // Find the first user that starts with input
                 } catch (er) {
-                    resolve(undefined);
+                    return resolve(undefined);
                 }
-            } else if (!user) reject(new Error("Expected value for \"guild\""));
-            resolve(user);
+            } else if (!user) return reject(new Error("Expected value for \"guild\""));
+            return resolve(user);
         }); 
     }
 
@@ -68,20 +68,27 @@ class Bot extends Client {
      * @param {the guild object of the user} guild 
      * @param {the user object of the user} user 
      */
-    getXP(guild, user) {
+    getXP(user) {
         if (typeof(user.id) != "string") 
             throw new Error("InputMismatch");
-        const { xp } = this.levels.prepare("SELECT xp WHERE guild = ? AND userid = ?").get(guild.id,user.id) || { xp: 0 };
+        const { xp } = this.levels.prepare("SELECT xp FROM levels WHERE userid = ?").get(user.id) || { xp: 0 };
+        
         return xp;
     }
 
-    leaderBoard(user, guild, type="local") {
-        if (!user || !guild)
-            throw new Excetiption("Expeceted parameters user and guild.");
-        
-    }
+    getRanks(guild=undefined) {
 
-    getRank(user) {
+        let users;
+        if (!guild) {
+            users = this.levels.prepare("SELECT * FROM levels ORDER BY xp DESC LIMIT 10").all();
+            return users;
+        } else {
+            if (typeof(guild) != "object")
+                throw new Error("InputMismatch");
+            users = guild.members.filter(m=>!m.user.bot).map(m => this.levels.prepare("SELECT * FROM levels WHERE userid = ?").get(m.id) || {xp:0, userid:m.id});
+            users = users.sort((a,b) => b.xp-a.xp);
+            return users;
+        }
 
     }
 

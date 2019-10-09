@@ -17,7 +17,7 @@ module.exports = {
                 return msg.channel.send("You already have a channel set as a global channel. Please delete it to continue.");
 
             webhook = await channel.createWebhook("Group", client.user.avatarURL);
-            webhook.channel = true;
+            webhook.channel = channel.id;
             client.globalChannels.set(msg.guild.id, webhook);
             msg.channel.send(`Successfully set ${channel} as the global channel`);
         } catch(er) {

@@ -4,11 +4,11 @@ function xpHandler(client, { guild, author:user, createdTimestamp }) {
 
     if (!guild) return;
     
-    const cooldown = client.cooldowns.get(guild.id+user.id) || 0;
-    
-    if (createdTimestamp - cooldown > Number("1.6667e+5")) {
-        client.giveXP(100,guild,user);
-        client.cooldowns.set(guild.id+user.id, createdTimestamp);
+    const cooldown = client.cooldowns.get(user.id) || 0;
+    console.log(cooldown)
+    if (createdTimestamp - cooldown > Number("3e+5")) {
+        client.giveXP(100,user);
+        client.cooldowns.set(user.id, createdTimestamp);
     }
 
 }
@@ -22,9 +22,9 @@ module.exports = {
 
         const msgArray = msg.content.split(" ");
         let cmd = client.commands.find(cmd => [cmd.name, ...cmd.alias].includes(msgArray[0].slice(1)) );
-        const gc = client.globalChannels.get(msg.guild.id) || {channel:undefined};
+        const gc = msg.guild ? (client.globalChannels.get(msg.guild.id) || {channel:undefined}) : {channel:undefined};
 
-        if (gc.channel) {
+        if (gc.channel == msg.channel.id) {
             client.messageSent(msg);
         } else {
             if (!msgArray[0].startsWith(prefix)) return;
