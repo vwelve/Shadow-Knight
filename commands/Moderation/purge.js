@@ -1,10 +1,10 @@
-function deleteMessages(number, channel) {
-    let i;
-    for (i = 0; i < Math.floor(number/100); ++i)
-        channel.bulkDelete(100);
+async function deleteMessages(number, channel) {
+
+    await channel.bulkDelete(number, true);
+    if (number > 100)
+        for (let i = 0; i < Math.floor((number-100)/100); i++)
+            await channel.bulkDelete(100, true);
     
-    if (number - i*100)
-        channel.bulkDelete(i*100);
 }
 
 module.exports = {
@@ -16,10 +16,13 @@ module.exports = {
     run: async (_client, msg, args) => {
 
         const number = parseInt(args[0]);
+        const { channel } = msg;
+
         if (isNaN(number))
             return msg.channel.send("Please specifiy how many messages you would like to delete.");
 
-        deleteMessages(number, msg.channel);
+        await msg.delete();
+        deleteMessages(number, channel);
     
     }
 }

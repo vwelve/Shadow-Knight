@@ -10,3 +10,8 @@ package-lock.json
 # Database files
 
 *.db
+
+# Images Or Gif Files
+
+*.png
+*.gif

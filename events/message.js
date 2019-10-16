@@ -5,7 +5,6 @@ function xpHandler(client, { guild, author:user, createdTimestamp }) {
     if (!guild) return;
     
     const cooldown = client.cooldowns.get(user.id) || 0;
-    console.log(cooldown)
     if (createdTimestamp - cooldown > Number("3e+5")) {
         client.giveXP(100,user);
         client.cooldowns.set(user.id, createdTimestamp);

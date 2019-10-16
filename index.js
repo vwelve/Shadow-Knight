@@ -8,7 +8,9 @@ class Bot extends Client {
         this.levels = new SQLite("./levels.db");
         this.commands = new Collection();
         this.cooldowns = new Collection();
+        this.repCooldown = new Collection();
         this.globalChannels = new Collection();
+        this.info = new SQLite("./info.db");
     }
 
     /**
@@ -40,7 +42,6 @@ class Bot extends Client {
             this.levels.prepare("UPDATE levels SET xp = xp + ? WHERE userid = ?").run(xp,user.id);            
         }
         const { xp:currentXP} = this.levels.prepare("SELECT * FROM levels WHERE userid = ?").get(user.id) || { xp: 0 };
-        console.log(currentXP)
         return currentXP;
     }
 
@@ -51,10 +52,10 @@ class Bot extends Client {
      */
     async findUser(input, guild) {
         return new Promise(async (resolve, reject) => {
-            let user = await this.fetchUser(input, true); // Try and fetch a user by id and cache it
+            let user = await this.fetchUser(input, true).catch(err => console.log(`${input} cannot be fetched. Continuing rest of the function now`)); // Try and fetch a user by id and cache it
             if (!user && guild) {
                 try{
-                    user = this.guilds.get(guild.id).members.find(m => m.user.tag.startsWith(input)).user; // Find the first user that starts with input
+                    user = this.guilds.get(guild.id).members.find(m => m.user.tag.toLowerCase().startsWith(input.toLowerCase())).user; // Find the first user that starts with input
                 } catch (er) {
                     return resolve(undefined);
                 }

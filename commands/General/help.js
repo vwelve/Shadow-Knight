@@ -10,8 +10,8 @@ module.exports = {
     run: async (client, msg, args) => {
 
         if (msg.guild) msg.channel.send("Sent you a dm!");
-
-        const { dmChannel, username, avatarURL } = msg.author;
+        const dmChannel = await msg.author.createDM();
+        const { username, avatarURL } = await client.findUser(msg.author.id);
         let embed;
         let [cmd] = args;
 
@@ -54,7 +54,7 @@ module.exports = {
             }
         }
 
+        
         await dmChannel.send(embed);
-
     }
 }
