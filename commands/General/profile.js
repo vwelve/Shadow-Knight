@@ -60,7 +60,7 @@ module.exports = {
             user = msg.author;
         }
         const guild = client.getRanks(msg.guild).map(u => u.userid).indexOf(user.id) + 1;
-        const global = client.getRanks().map(u => u.userid).indexOf(user.id) + 1 ;
+        const global = client.getRanks().map(u => u.userid).indexOf(user.id);
         const xp = client.getRanks(msg.guild).map(u => [u.userid,u.xp])[guild-1][1];
         const userinfo = client.info.prepare("SELECT * FROM userinfo WHERE userid = ?").get(user.id) || {info:"Mysterious 👀", rep:0};
         const avatar = user.displayAvatarURL;
@@ -97,7 +97,7 @@ module.exports = {
                                 userinfo, 
                                 xp, 
                                 guild, 
-                                global
+                                global > -1 ? global+1 : "Not Ranked."
                             ];
 
                             const ctx = await get_frames(...options);
@@ -122,7 +122,7 @@ module.exports = {
                 userinfo, 
                 xp, 
                 guild, 
-                global
+                global > -1 ? global+1 : "Not Ranked."
             ];
             let ctx = await get_frames(...options)
             profile = await ctx.canvas.toBuffer();

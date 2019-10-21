@@ -13,5 +13,5 @@ package-lock.json
 
 # Images Or Gif Files
 
-*.png
+/*.png
 *.gif
