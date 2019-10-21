@@ -10,6 +10,7 @@ class Bot extends Client {
         this.cooldowns = new Collection();
         this.repCooldown = new Collection();
         this.globalChannels = new Collection();
+        this.activeUsers = new Collection();
         this.info = new SQLite("./info.db");
     }
 
